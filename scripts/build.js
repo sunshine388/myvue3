@@ -9,7 +9,6 @@ const targets = fs.readdirSync("packages").filter((f) => {
   }
   return true;
 });
-console.log(targets);
 // 对目标进行依次打包， 并行打包
 
 async function build(target) {
