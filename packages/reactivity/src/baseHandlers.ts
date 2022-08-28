@@ -1,6 +1,8 @@
 // 实现 new Proxy(target, handler)
 
 import { extend, isObject } from "@vue/shared";
+import { track } from "./effect";
+import { TrackOpTypes } from "./operators";
 import { reactive, readonly } from "./reactive";
 
 function createGetter(isReadonly = false, shallow = false) {
@@ -9,6 +11,9 @@ function createGetter(isReadonly = false, shallow = false) {
     const res = Reflect.get(target, key, receiver);
     if (!isReadonly) {
       // 收集依赖，等数据变化更新视图
+      console.log("执行effet时会取值", "收集effect");
+
+      track(target, TrackOpTypes.GET, key);
     }
     if (shallow) {
       return res;
@@ -22,7 +27,7 @@ function createGetter(isReadonly = false, shallow = false) {
 function createSetter(shallow = false) {
   return function set(target, key, value, receiver) {
     const res = Reflect.set(target, key, value, receiver);
-
+    // 当数据更新时，通知对应属性的effect重新执行
     return res;
   };
 } // 拦截设置功能
