@@ -1,3 +1,5 @@
+import { isArray } from "@vue/shared";
+
 export function effect(fn, options: any = {}) {
   const effect = createReactiveEffect(fn, options);
 
@@ -49,4 +51,32 @@ export function track(target, type, key) {
     dep.add(activeEffect);
   }
   console.log(targetMap);
+}
+
+export function trigger(target, type, key?, newValue?, oldValue?) {
+  const depsMap = targetMap.get(target);
+  if (!depsMap) return;
+
+  const effects = new Set();
+  const add = (effectsToAdd) => {
+    if (effectsToAdd) {
+      effectsToAdd.forEach((effect) => effects.add(effect));
+    }
+  };
+  // 1. 看修改的是不是数组的长度
+  if (key === "length" && isArray(target)) {
+    depsMap.forEach((dep, key) => {
+      if (key === "length" || key > newValue) {
+        add(dep);
+      }
+    });
+  } else {
+    // 可能是对象
+    if (key !== undefined) {
+      add(depsMap.get(key));
+    }
+    // 如果修改数组的某一个索引
+  }
+
+  effects.forEach((effect: any) => effect());
 }
